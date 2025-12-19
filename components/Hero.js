@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { TypeAnimation } from 'react-type-animation';
 import { upscalerService } from '@/services/upscaler';
 import ResultDisplay from './ResultDisplay';
 import { useUser } from '@/context/UserContext';
@@ -137,41 +138,106 @@ export default function Hero() {
     }
 
     return (
-        <section className="pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-white to-cyan-50">
-            <div className="max-w-7xl mx-auto">
+        <section className="relative pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 via-white to-cyan-50 overflow-hidden">
+            {/* Background Floating Elements */}
+            <div className="absolute inset-0 pointer-events-none">
+                <motion.div
+                    animate={{
+                        y: [0, -20, 0],
+                        opacity: [0.3, 0.6, 0.3],
+                    }}
+                    transition={{
+                        duration: 5,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                    className="absolute top-20 left-10 w-72 h-72 bg-blue-400/10 rounded-full blur-3xl"
+                />
+                <motion.div
+                    animate={{
+                        y: [0, 20, 0],
+                        opacity: [0.3, 0.6, 0.3],
+                    }}
+                    transition={{
+                        duration: 7,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: 1
+                    }}
+                    className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-400/10 rounded-full blur-3xl"
+                />
+            </div>
+
+            <motion.div
+                className="max-w-7xl mx-auto relative z-10"
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+            >
                 <div className="text-center mb-12">
                     {/* Badge */}
-                    <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full mb-6">
+                    <motion.div variants={fadeInUp} className="inline-flex items-center space-x-2 bg-blue-100 text-blue-700 px-4 py-2 rounded-full mb-6 relative overflow-hidden group">
+                        <motion.div
+                            className="absolute inset-0 bg-white/40"
+                            initial={{ x: '-100%' }}
+                            whileInView={{ x: '200%' }}
+                            transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 3 }}
+                        />
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                         <span className="font-semibold text-sm">AI-Powered Upscaling</span>
-                    </div>
+                    </motion.div>
+
+                    {/* Typing Animation Greeting */}
+                    <motion.div variants={fadeInUp} className="mb-4 h-8 flex justify-center items-center">
+                        <TypeAnimation
+                            sequence={[
+                                'Enhance Your Memories',
+                                2000,
+                                'Restore Old Photos',
+                                2000,
+                                'Increase Image Quality',
+                                2000,
+                                'Professional Upscaling',
+                                2000
+                            ]}
+                            wrapper="span"
+                            speed={50}
+                            style={{ fontSize: '1.2rem', fontWeight: '600', color: '#4B5563' }} // gray-600
+                            repeat={Infinity}
+                        />
+                    </motion.div>
 
                     {/* Main Heading */}
-                    <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight">
+                    <motion.h1 variants={fadeInUp} className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight">
                         AI Image <br />
                         <span className="gradient-text">Upscaler & Photo Enhancer</span>
-                    </h1>
+                    </motion.h1>
 
-                    <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+                    <motion.p variants={fadeInUp} className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
                         Increase image resolution with our advanced upscaling technology. Enhance photos up to <strong className="text-blue-600">8x</strong> without losing quality.
-                    </p>
+                    </motion.p>
 
                     {/* Error Display */}
                     {error && (
-                        <div className="max-w-2xl mx-auto mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg animate-shake">
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="max-w-2xl mx-auto mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg"
+                        >
                             <div className="flex items-center">
                                 <svg className="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <p className="text-red-700 font-medium">{error}</p>
                             </div>
-                        </div>
+                        </motion.div>
                     )}
 
                     {/* Upload Area */}
-                    <div className="max-w-2xl mx-auto">
+                    <motion.div variants={fadeInUp} className="max-w-2xl mx-auto">
                         <motion.form
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
@@ -308,11 +374,9 @@ export default function Hero() {
                             onClick={handleUpscale}
                             className="btn-primary w-full sm:w-auto relative btn-shine overflow-hidden"
                             disabled={!selectedFile || processing}
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.5 }}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            variants={fadeInUp}
                         >
                             {processing ? (
                                 <span className="flex items-center gap-3 justify-center">
@@ -328,9 +392,9 @@ export default function Hero() {
                                 </span>
                             )}
                         </motion.button>
-                    </div>
+                    </motion.div>
                 </div>
-            </div>
+            </motion.div>
 
             <style jsx>{`
                 @keyframes shake {

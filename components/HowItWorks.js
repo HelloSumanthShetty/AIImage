@@ -1,3 +1,7 @@
+'use client';
+
+import { motion } from 'framer-motion';
+
 export default function HowItWorks() {
     const steps = [
         {
@@ -54,25 +58,42 @@ export default function HowItWorks() {
                         >
                             {/* Connector Line */}
                             {index < steps.length - 1 && (
-                                <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gradient-to-r from-blue-300 to-transparent -z-10" />
+                                <div className="hidden md:block absolute top-16 left-full w-full h-0.5 bg-gray-100 -z-10 overflow-hidden">
+                                    <motion.div
+                                        className="h-full bg-gradient-to-r from-blue-300 to-transparent"
+                                        initial={{ x: '-100%' }}
+                                        whileInView={{ x: '100%' }}
+                                        transition={{ duration: 1.5, delay: index * 0.3, repeat: Infinity, repeatDelay: 1 }}
+                                    />
+                                </div>
                             )}
 
                             {/* Card */}
-                            <div className="relative bg-gradient-to-br from-white to-blue-50 p-8 rounded-2xl border border-blue-100 shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-2">
+                            <motion.div
+                                className="relative bg-gradient-to-br from-white to-blue-50 p-8 rounded-2xl border border-blue-100 shadow-md hover:shadow-xl transition-all duration-300"
+                                initial={{ opacity: 0, y: 30 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.2, duration: 0.5 }}
+                                whileHover={{ y: -10 }}
+                            >
                                 {/* Number Badge */}
                                 <div className="absolute -top-4 -right-4 w-16 h-16 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-full flex items-center justify-center shadow-lg">
                                     <span className="text-2xl font-bold text-white">{step.number}</span>
                                 </div>
 
                                 {/* Icon */}
-                                <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center text-white mb-6 group-hover:scale-110 transition-transform duration-300">
+                                <motion.div
+                                    className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center text-white mb-6"
+                                    whileHover={{ scale: 1.1, rotate: 5 }}
+                                >
                                     {step.icon}
-                                </div>
+                                </motion.div>
 
                                 {/* Content */}
                                 <h3 className="text-2xl font-bold mb-4 text-gray-900">{step.title}</h3>
                                 <p className="text-gray-600 leading-relaxed">{step.description}</p>
-                            </div>
+                            </motion.div>
                         </div>
                     ))}
                 </div>
@@ -80,7 +101,7 @@ export default function HowItWorks() {
                 {/* CTA Below */}
                 <div className="text-center mt-16">
                     <button className="btn-primary">
-                        Try It Now - It's Free
+                        Try It Now - It&apos;s Free
                     </button>
                 </div>
             </div>

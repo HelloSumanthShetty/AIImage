@@ -5,6 +5,7 @@ import { useUser } from '@/context/UserContext';
 import LoginModal from './LoginModal';
 import PricingModal from './PricingModal';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 export default function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -46,7 +47,13 @@ export default function Navbar() {
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-3 pl-2 border-l border-gray-200">
-                                        <img src={user.avatar} alt="User" className="w-8 h-8 rounded-full border border-gray-200" />
+                                        <Image
+                                            src={user.avatar}
+                                            alt="User"
+                                            width={32}
+                                            height={32}
+                                            className="rounded-full border border-gray-200"
+                                        />
                                         <button
                                             onClick={logout}
                                             className="text-sm font-medium text-gray-500 hover:text-red-500 transition-colors"

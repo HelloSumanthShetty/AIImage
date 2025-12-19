@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 export default function ShowcaseStrip() {
     // Standardize items - no hardcoded 'compare' types anymore
@@ -60,12 +61,13 @@ export default function ShowcaseStrip() {
                                     animate={{ scale: 1, opacity: 1 }}
                                     transition={{ duration: 0.5, type: "spring" }}
                                 >
-                                    {/* Content (Same as before) */}
                                     <div className="absolute inset-0">
-                                        <img
+                                        <Image
                                             src={item.src}
                                             alt="Original"
-                                            className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ${!isEnhanced ? 'blur-[1px] brightness-90 saturate-50' : ''}`}
+                                            fill
+                                            className={`object-cover transition-all duration-700 ${!isEnhanced ? 'blur-[1px] brightness-90 saturate-50' : ''}`}
+                                            sizes="320px"
                                         />
 
                                         {/* Overlay for Enhanced State */}
@@ -75,10 +77,12 @@ export default function ShowcaseStrip() {
                                             transition={{ duration: 0.8 }}
                                             className="absolute inset-0"
                                         >
-                                            <img
+                                            <Image
                                                 src={item.src}
                                                 alt="AI Enhanced"
-                                                className="w-full h-full object-cover"
+                                                fill
+                                                className="object-cover"
+                                                sizes="320px"
                                             />
                                         </motion.div>
                                     </div>
@@ -120,10 +124,12 @@ export default function ShowcaseStrip() {
                                 animate={{ scale: 1 }}
                                 transition={{ duration: 0.5 }}
                             >
-                                <img
+                                <Image
                                     src={item.src}
                                     alt={item.alt}
-                                    className="w-full h-full object-cover"
+                                    fill
+                                    className="object-cover"
+                                    sizes="160px"
                                 />
                             </motion.div>
                         );

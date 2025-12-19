@@ -73,10 +73,12 @@ export default function ResultDisplay({ result, onDownload, onReset }) {
                         onClick={handleMove}
                     >
                         {/* After Image (Enhanced) */}
-                        <img
+                        <Image
                             src={result.upscaledImage}
                             alt="Enhanced Image"
-                            className="absolute inset-0 w-full h-full object-contain"
+                            fill
+                            className="object-contain"
+                            sizes="(max-width: 768px) 100vw, 100vw"
                         />
 
                         {/* Before Image (Original) with degradation */}
@@ -84,14 +86,16 @@ export default function ResultDisplay({ result, onDownload, onReset }) {
                             className="absolute inset-0"
                             style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
                         >
-                            <img
+                            <Image
                                 src={result.originalImage}
                                 alt="Original Image"
-                                className="w-full h-full object-contain"
+                                fill
+                                className="object-contain"
                                 style={{
                                     filter: 'blur(2px) brightness(0.9) contrast(0.9)',
                                     imageRendering: 'pixelated'
                                 }}
+                                sizes="(max-width: 768px) 100vw, 100vw"
                             />
                         </div>
 
@@ -128,14 +132,17 @@ export default function ResultDisplay({ result, onDownload, onReset }) {
                 <div className="grid md:grid-cols-2 gap-6">
                     <div className="bg-white rounded-2xl shadow-xl p-6">
                         <h4 className="text-lg font-bold mb-4 text-red-600">Original</h4>
-                        <img
+                        <Image
                             src={result.originalImage}
                             alt="Original"
-                            className="w-full rounded-lg shadow-md"
+                            width={result.originalDimensions.width}
+                            height={result.originalDimensions.height}
+                            className="w-full h-auto rounded-lg shadow-md"
                             style={{
                                 filter: 'blur(2px) brightness(0.9) contrast(0.9)',
                                 imageRendering: 'pixelated'
                             }}
+                            sizes="(max-width: 768px) 100vw, 50vw"
                         />
                         <p className="text-sm text-gray-600 mt-3">
                             {result.originalDimensions.width} × {result.originalDimensions.height}px
@@ -143,10 +150,13 @@ export default function ResultDisplay({ result, onDownload, onReset }) {
                     </div>
                     <div className="bg-white rounded-2xl shadow-xl p-6">
                         <h4 className="text-lg font-bold mb-4 gradient-text">Enhanced ({result.scaleFactor}x)</h4>
-                        <img
+                        <Image
                             src={result.upscaledImage}
                             alt="Enhanced"
-                            className="w-full rounded-lg shadow-md"
+                            width={result.upscaledDimensions.width}
+                            height={result.upscaledDimensions.height}
+                            className="w-full h-auto rounded-lg shadow-md"
+                            sizes="(max-width: 768px) 100vw, 50vw"
                         />
                         <p className="text-sm text-blue-600 font-semibold mt-3">
                             {result.upscaledDimensions.width} × {result.upscaledDimensions.height}px
