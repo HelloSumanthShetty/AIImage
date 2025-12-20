@@ -1,13 +1,18 @@
 'use client';
 
+import { authClient } from '@/lib/auth-client';
+import { useRouter } from 'next/navigation';
+import { useCredits } from '@/hooks/useCredits'; // Import hook
+
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { TypeAnimation } from 'react-type-animation';
 import { upscalerService } from '@/services/upscaler';
 import ResultDisplay from './ResultDisplay';
-import { useUser } from '@/context/UserContext';
-import LoginModal from './LoginModal';
+import { useSession, signIn } from '@/lib/auth-client';
+// import LoginModal from './auth/SignInModal';
 import PricingModal from './PricingModal';
+import SignInModal from './auth/SignInModal';
 
 // Animation variants
 const fadeInUp = {
@@ -31,8 +36,11 @@ export default function Hero() {
     const [processing, setProcessing] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
+    const router = useRouter();
 
-    const { user, deductCredit } = useUser();
+    const { data: session } = useSession();
+    const { credits, updateCredits } = useCredits(); // Use hook
+    const user = session?.user;
     const [isLoginOpen, setIsLoginOpen] = useState(false);
     const [isPricingOpen, setIsPricingOpen] = useState(false);
 
@@ -85,14 +93,10 @@ export default function Hero() {
             return;
         }
 
-        if (user.credits <= 0) {
+        if (credits <= 0) {
             setIsPricingOpen(true);
             return;
         }
-
-        // Deduct credit
-        const deducted = deductCredit();
-        if (!deducted) return;
 
         setProcessing(true);
         setError(null);
@@ -100,6 +104,14 @@ export default function Hero() {
         try {
             const upscaleResult = await upscalerService.upscaleImage(selectedFile, scaleFactor);
             setResult(upscaleResult);
+
+            // Update credits directly from result
+            if (upscaleResult.remainingCredits !== undefined) {
+                updateCredits(upscaleResult.remainingCredits);
+            }
+
+            // Optionally refresh session too
+            router.refresh();
         } catch (err) {
             setError(err.message);
         } finally {
@@ -406,7 +418,7 @@ export default function Hero() {
                     animation: shake 0.5s ease-in-out;
                 }
             `}</style>
-            <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
+            <SignInModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
             <PricingModal isOpen={isPricingOpen} onClose={() => setIsPricingOpen(false)} />
         </section>
     );

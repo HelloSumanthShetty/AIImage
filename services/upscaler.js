@@ -59,6 +59,21 @@ class UpscalerService {
         }
 
         try {
+            // Deduct credit via server API
+            const response = await fetch('/api/upscale', {
+                method: 'POST',
+            });
+
+            // Parse response
+            const responseData = await response.json().catch(() => ({}));
+            const remainingCredits = responseData.remaining;
+
+            if (!response.ok) {
+                if (response.status === 401) throw new Error('Please sign in to continue');
+                if (response.status === 402) throw new Error('Insufficient credits. Please buy more.');
+                throw new Error('Failed to start upscale process');
+            }
+
             // Simulate API processing delay
             await new Promise(resolve => setTimeout(resolve, CONFIG.PROCESSING_DELAY));
 
@@ -82,6 +97,7 @@ class UpscalerService {
                 },
                 scaleFactor,
                 processingTime: CONFIG.PROCESSING_DELAY,
+                remainingCredits, // Pass remaining credits back
             };
         } catch (error) {
             throw new Error(`Upscaling failed: ${error.message}`);

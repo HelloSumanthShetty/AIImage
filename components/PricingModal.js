@@ -2,25 +2,31 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
-import { useUser } from '@/context/UserContext';
-
+// import { useUser } from '@/context/UserContext';
 export default function PricingModal({ isOpen, onClose }) {
-    const { addCredits } = useUser();
+    // const { addCredits } = useUser();
     const [processing, setProcessing] = useState(false);
     const [success, setSuccess] = useState(false);
 
-    const handlePurchase = (amount, price) => {
+    const handlePurchase = async (amount, price) => {
         setProcessing(true);
-        // Simulate Stripe processing
-        setTimeout(() => {
+        try {
+            const response = await fetch('/api/stripe/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount, price }),
+            });
+            const data = await response.json();
+            if (data.url) {
+                window.location.href = data.url;
+            } else {
+                console.error('Stripe Checkout URL not found');
+                setProcessing(false);
+            }
+        } catch (error) {
+            console.error('Error creating checkout session:', error);
             setProcessing(false);
-            setSuccess(true);
-            setTimeout(() => {
-                addCredits(amount);
-                setSuccess(false);
-                onClose();
-            }, 1500);
-        }, 2000);
+        }
     };
 
     return (
