@@ -59,45 +59,44 @@ class UpscalerService {
         }
 
         try {
-            // Deduct credit via server API
+            // Prepare FormData
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('scale', scaleFactor); // Optional, if backend uses it
+
+            // Send to server
             const response = await fetch('/api/upscale', {
                 method: 'POST',
+                body: formData,
             });
 
-            // Parse response
             const responseData = await response.json().catch(() => ({}));
-            const remainingCredits = responseData.remaining;
 
             if (!response.ok) {
                 if (response.status === 401) throw new Error('Please sign in to continue');
                 if (response.status === 402) throw new Error('Insufficient credits. Please buy more.');
-                throw new Error('Failed to start upscale process');
+                throw new Error(responseData.message || 'Failed to process image');
             }
 
-            // Simulate API processing delay
-            await new Promise(resolve => setTimeout(resolve, CONFIG.PROCESSING_DELAY));
-
-            // In a real implementation, you would:
-            // 1. Upload the image to the API
-            // 2. Wait for processing
-            // 3. Get the upscaled image URL
-
-            // For now, return mock data
-            const originalDimensions = await this.getImageDimensions(file);
+            // Get dimensions for UI (client-side calculation for speed)
+            // Get dimensions for UI (client-side calculation for speed)
             const objectUrl = URL.createObjectURL(file);
 
             return {
                 success: true,
                 originalImage: objectUrl,
-                upscaledImage: objectUrl, // Use same image for now
-                originalDimensions,
-                upscaledDimensions: {
-                    width: originalDimensions.width * scaleFactor,
-                    height: originalDimensions.height * scaleFactor
+                upscaledImage: responseData.imageUrl, // Real URL from Cloudinary
+                originalDimensions: {
+                    width: responseData.originalWidth || 0,
+                    height: responseData.originalHeight || 0
                 },
+                upscaledDimensions: {
+                    width: responseData.targetWidth || 0,
+                    height: responseData.targetHeight || 0
+                },
+                originalSize: file.size,
                 scaleFactor,
-                processingTime: CONFIG.PROCESSING_DELAY,
-                remainingCredits, // Pass remaining credits back
+                remainingCredits: responseData.remaining,
             };
         } catch (error) {
             throw new Error(`Upscaling failed: ${error.message}`);
