@@ -7,10 +7,16 @@ export async function GET() {
     const dbUrl = process.env.DATABASE_URL;
 
     // 1. Check Env Var existence
-    if (!dbUrl) {
+    // 1. Check Env Var existence
+    const missingVars = [];
+    if (!dbUrl) missingVars.push('DATABASE_URL');
+    if (!process.env.BETTER_AUTH_SECRET) missingVars.push('BETTER_AUTH_SECRET');
+    if (!process.env.BETTER_AUTH_URL) missingVars.push('BETTER_AUTH_URL');
+
+    if (missingVars.length > 0) {
         return NextResponse.json({
             status: 'error',
-            message: 'DATABASE_URL is missing in environment variables',
+            message: `Missing environment variables: ${missingVars.join(', ')}`,
             env_check: 'FAIL'
         }, { status: 500 });
     }
