@@ -10,7 +10,11 @@ export async function POST(req) {
         return await authPOST(req);
     } catch (error) {
         console.error("Auth POST Error:", error);
-        return new NextResponse("Internal Auth Error", { status: 500 });
+        return new NextResponse(JSON.stringify({
+            message: "Internal Auth Error",
+            error: error.message,
+            stack: error.stack
+        }), { status: 500 });
     }
 }
 
@@ -19,6 +23,10 @@ export async function GET(req) {
         return await authGET(req);
     } catch (error) {
         console.error("Auth GET Error:", error);
-        return new NextResponse("Internal Auth Error", { status: 500 });
+        return new NextResponse(JSON.stringify({
+            message: "Internal Auth Error",
+            error: error.message,
+            stack: error.stack
+        }), { status: 500 });
     }
 }
