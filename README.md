@@ -11,6 +11,8 @@ A modern, responsive web application for AI-powered image upscaling built with N
 ✅ **Responsive Design** - Works on mobile and desktop  
 ✅ **Error Handling** - User-friendly error messages  
 ✅ **Loading States** - Clear visual feedback during processing  
+✅ **Enhanced Security & Auth** - Better authentication mechanisms integrated  
+✅ **Payment Support** - Stripe integration for monetizing AI features  
 
 ## Getting Started
 
@@ -34,151 +36,58 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 npm run build
 ```
 
+## Environment Variables
+
+The following environment variables are required to configure the application. Create a `.env.local` file in your project and include the following:
+
+```env
+# Cloudinary - Used for image handling
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+NEXT_PUBLIC_CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+# Supabase - Authentication and backend services
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+
+# Stripe - Payment integration
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+STRIPE_SECRET_KEY=your_stripe_secret_key
+
+# BetterAuth - Enhanced authentication
+NEXT_PUBLIC_BETTERAUTH_KEY=your_betterauth_key
+NEXT_PUBLIC_BETTERAUTH_URL=your_betterauth_url
+
+# Database - Application backend database connection
+DATABASE_URL=your_database_url
+```
+
+
 ## Current Implementation
 
-The application currently uses a **mock upscaling service** that simulates API processing. The mock service:
+The application includes robust integrations such as **Supabase** for authentication, **Cloudinary** for image handling, and **Stripe** for payment processing. A mock upscaling service is used for development purposes, which can be replaced with real AI-powered APIs in production. The mock service:
 
 - Validates image files (format, size)
 - Simulates processing delay (3 seconds)
 - Returns a demo upscaled image
 - All configurable in `services/upscaler.js`
 
-## Integrating Real AI APIs
+For production, update the mock implementation with your preferred AI API.
 
-To integrate a real upscaling API, update `services/upscaler.js`:
+---
 
-### Option 1: Replicate API (Real-ESRGAN)
+## Tech Stack
 
-```javascript
-// services/upscaler.js
-async upscaleImage(file, scaleFactor = 4) {
-  const validation = this.validateImage(file);
-  if (!validation.valid) throw new Error(validation.errors.join(', '));
+- **Next.js 14** - React framework
+- **TailwindCSS** - Styling
+- **Supabase** - Authentication
+- **Cloudinary** - Image handling
+- **Stripe** - Payment integration
+- **BetterAuth** - Enhanced authentication
+- **JavaScript** - Programming language
 
-  // Convert file to base64
-  const base64 = await this.fileToBase64(file);
-
-  // Call Replicate API
-  const response = await fetch('https://api.replicate.com/v1/predictions', {
-    method: 'POST',
-    headers: {
-      'Authorization': `Token ${process.env.NEXT_PUBLIC_REPLICATE_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      version: 'YOUR_MODEL_VERSION',
-      input: {
-        image: base64,
-        scale: scaleFactor
-      }
-    })
-  });
-
-  const prediction = await response.json();
-  
-  // Poll for results
-  let result = prediction;
-  while (result.status !== 'succeeded' && result.status !== 'failed') {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    const statusResponse = await fetch(prediction.urls.get, {
-      headers: { 'Authorization': `Token ${process.env.NEXT_PUBLIC_REPLICATE_API_KEY}` }
-    });
-    result = await statusResponse.json();
-  }
-
-  if (result.status === 'failed') {
-    throw new Error('Upscaling failed');
-  }
-
-  return {
-    success: true,
-    originalImage: URL.createObjectURL(file),
-    upscaledImage: result.output,
-    // ... other fields
-  };
-}
-```
-
-### Option 2: Clipdrop API
-
-```javascript
-async upscaleImage(file, scaleFactor = 4) {
-  const validation = this.validateImage(file);
-  if (!validation.valid) throw new Error(validation.errors.join(', '));
-
-  const formData = new FormData();
-  formData.append('image_file', file);
-  formData.append('target_width', originalWidth * scaleFactor);
-  formData.append('target_height', originalHeight * scaleFactor);
-
-  const response = await fetch('https://clipdrop-api.co/image-upscaling/v1/upscale', {
-    method: 'POST',
-    headers: {
-      'x-api-key': process.env.NEXT_PUBLIC_CLIPDROP_API_KEY,
-    },
-    body: formData
-  });
-
-  const blob = await response.blob();
-  const upscaledUrl = URL.createObjectURL(blob);
-
-  return {
-    success: true,
-    originalImage: URL.createObjectURL(file),
-    upscaledImage: upscaledUrl,
-    // ... other fields
-  };
-}
-```
-
-### Option 3: Fal.ai
-
-```javascript
-import * as fal from "@fal-ai/serverless-client";
-
-async upscaleImage(file, scaleFactor = 4) {
-  const validation = this.validateImage(file);
-  if (!validation.valid) throw new Error(validation.errors.join(', '));
-
-  // Upload image
-  const imageUrl = await fal.storage.upload(file);
-
-  // Run upscaling
-  const result = await fal.subscribe("fal-ai/real-esrgan", {
-    input: {
-      image_url: imageUrl,
-      scale: scaleFactor
-    }
-  });
-
-  return {
-    success: true,
-    originalImage: URL.createObjectURL(file),
-    upscaledImage: result.image.url,
-    // ... other fields
-  };
-}
-```
-
-## Configuration
-
-Edit `services/upscaler.js` to configure:
-
-```javascript
-const CONFIG = {
-  // Change this to test with different demo images
-  MOCK_UPSCALED_IMAGE: '/images/portrait-after.png',
-  
-  // Processing delay for mock service
-  PROCESSING_DELAY: 3000,
-  
-  // Maximum file size (10MB)
-  MAX_FILE_SIZE: 10 * 1024 * 1024,
-  
-  // Supported formats
-  SUPPORTED_FORMATS: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/heic'],
-};
-```
+---
 
 ## Project Structure
 
@@ -202,33 +111,16 @@ const CONFIG = {
     └── images/              # Demo images
 ```
 
-## Environment Variables
-
-For production APIs, create a `.env.local` file:
-
-```env
-# Replicate
-NEXT_PUBLIC_REPLICATE_API_KEY=your_key_here
-
-# Clipdrop
-NEXT_PUBLIC_CLIPDROP_API_KEY=your_key_here
-
-# Fal.ai
-NEXT_PUBLIC_FAL_KEY=your_key_here
-```
-
-## Tech Stack
-
-- **Next.js 14** - React framework
-- **TailwindCSS** - Styling
-- **JavaScript** - Programming language
+---
 
 ## License
 
 MIT
 
+---
+
 ## Notes
 
-- The current implementation is client-side only (static export)
-- For server-side API integration, remove `output: 'export'` from `next.config.js`
-- All API integrations shown above are examples and may need adjustment based on current API specifications
+- The current implementation is client-side only (static export).
+- For server-side API integration, remove `output: 'export'` from `next.config.js`.
+- Replace the mock service in `services/upscaler.js` with real API logic when ready for production.
